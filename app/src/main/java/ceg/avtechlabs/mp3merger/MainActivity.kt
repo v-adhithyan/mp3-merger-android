@@ -17,6 +17,11 @@ import java.io.SequenceInputStream
 import java.util.*
 import kotlin.collections.ArrayList
 import android.os.Environment.getExternalStorageDirectory
+import android.util.Log
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.progressDialog
+import org.jetbrains.anko.toast
+import org.jetbrains.anko.uiThread
 import java.io.File
 import java.io.FileOutputStream
 
@@ -59,33 +64,55 @@ class MainActivity : AppCompatActivity() {
         when(requestCode) {
             SELECT_MP3 -> {
                 if(resultCode == Activity.RESULT_OK) {
-                    val mp3Count = data?.clipData?.itemCount
-                    val mp3FilesUri = ArrayList<Uri>()
-                    for(i in 0..mp3Count!!-1) {
-                        mp3FilesUri.add(data.clipData?.getItemAt(i)!!.uri)
-                    }
-
-                    val fileStreams = LinkedList<InputStream>()
-                    for(uri in mp3FilesUri) {
-                        if(uri.scheme.equals("content")) {
-                            val inputStream = contentResolver.openInputStream(uri)
-                            fileStreams.add(inputStream)
-                        } else {
-
+                        val mp3Count = data?.clipData?.itemCount
+                        val mp3FilesUri = ArrayList<Uri>()
+                        for(i in 0..mp3Count!!-1) {
+                            mp3FilesUri.add(data.clipData?.getItemAt(i)!!.uri)
                         }
-                    }
 
-                    val sequenceStream = SequenceInputStream(Collections.enumeration(fileStreams))
-                    //val file = File(Environment.getExternalStorageDirectory().absolutePath + "/mymerge.mp3")
-                    val fos = FileOutputStream(Environment.getExternalStorageDirectory().absolutePath + "/mymerge.mp3")
-                    var temp: Int
-                    while(true) {
-                        temp = sequenceStream.read()
-                        if(temp == -1)
-                            break
-                        fos.write(temp)
+                        val fileStreams = LinkedList<InputStream>()
+                        for(uri in mp3FilesUri) {
+                            if(uri.scheme.equals("content")) {
+                                val inputStream = contentResolver.openInputStream(uri)
+                                fileStreams.add(inputStream)
+                            } else {
+
+                            }
+                        }
+
+                        val sequenceStream = SequenceInputStream(Collections.enumeration(fileStreams))
+
+                        val fname = Environment.getExternalStorageDirectory().absolutePath + "/AVMp3Merger/mymerge.mp3"
+                        val file = File(fname)
+                        if(!file.exists()) {
+                            if(!file.parentFile.exists()) {
+                                file.parentFile.mkdirs()
+                            }
+                            file.createNewFile()
+                        }
+                        val fos = FileOutputStream(file, false)
+                        var temp: Int
+                        val buffer = ByteArray(1024)
+                        val totalBytes = sequenceStream.available()
+                        var totalWritten = 0
+                        while(true) {
+                            temp = sequenceStream.read(buffer)
+                            totalWritten += temp
+                            Log.v("ADHITHYAN", ((totalBytes - totalWritten)*100/totalBytes).toString())
+                            uiThread {
+                                toast(((totalBytes - totalWritten)*100/totalBytes).toString())
+                            }
+                            if(temp == -1)
+                                break
+                            fos.write(buffer)
+                            uiThread {
+                                toast(((totalBytes - totalWritten)*100/totalBytes).toString())
+                            }
+                            //Log.d("PERCENT", ((totalBytes - totalWritten)*100/totalBytes).toString())
+                        }
+                        sequenceStream.close()
+                        fos.close()
                     }
-                    fos.close()
                 }
             }
         }
