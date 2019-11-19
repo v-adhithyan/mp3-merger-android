@@ -64,6 +64,7 @@ class MainActivity : AppCompatActivity() {
         when(requestCode) {
             SELECT_MP3 -> {
                 if(resultCode == Activity.RESULT_OK) {
+                    doAsync {
                         val mp3Count = data?.clipData?.itemCount
                         val mp3FilesUri = ArrayList<Uri>()
                         for(i in 0..mp3Count!!-1) {
@@ -71,16 +72,16 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         val fileStreams = LinkedList<InputStream>()
-                        for(uri in mp3FilesUri) {
+                        /*for(uri in mp3FilesUri) {
                             if(uri.scheme.equals("content")) {
                                 val inputStream = contentResolver.openInputStream(uri)
                                 fileStreams.add(inputStream)
                             } else {
 
                             }
-                        }
+                        }*/
 
-                        val sequenceStream = SequenceInputStream(Collections.enumeration(fileStreams))
+                        //val sequenceStream = SequenceInputStream(Collections.enumeration(fileStreams))
 
                         val fname = Environment.getExternalStorageDirectory().absolutePath + "/AVMp3Merger/mymerge.mp3"
                         val file = File(fname)
@@ -89,28 +90,47 @@ class MainActivity : AppCompatActivity() {
                                 file.parentFile.mkdirs()
                             }
                             file.createNewFile()
+                        } else {
+                            file.delete()
+                            file.createNewFile()
                         }
                         val fos = FileOutputStream(file, false)
                         var temp: Int
                         val buffer = ByteArray(1024)
-                        val totalBytes = sequenceStream.available()
+                        //val totalBytes = fileStreams.red
                         var totalWritten = 0
-                        while(true) {
+                        /*while(true) {
+                            //temp = sequenceStream.read()
                             temp = sequenceStream.read(buffer)
                             totalWritten += temp
-                            Log.v("ADHITHYAN", ((totalBytes - totalWritten)*100/totalBytes).toString())
+
                             uiThread {
                                 toast(((totalBytes - totalWritten)*100/totalBytes).toString())
                             }
-                            if(temp == -1)
+                            Log.i("ADHIPERCENT", ((totalBytes - totalWritten)*100/totalBytes).toString())
+                            if(temp >= totalBytes || temp == -1)
                                 break
-                            fos.write(buffer)
+                            fos.write(buffer, 0, temp)
                             uiThread {
                                 toast(((totalBytes - totalWritten)*100/totalBytes).toString())
                             }
                             //Log.d("PERCENT", ((totalBytes - totalWritten)*100/totalBytes).toString())
+                        }*/
+                        //sequenceStream.close()
+                        for(uri in mp3FilesUri.reversed()) {
+                            if(uri.scheme.equals("content")) {
+                                val inputStream = contentResolver.openInputStream(uri)
+                                while(true) {
+                                    val read = inputStream.read(buffer)
+                                    if (read > 0) {
+                                        fos.write(buffer, 0, read)
+                                    } else {
+                                        inputStream.close()
+                                        break
+                                    }
+                                }
+                            }
                         }
-                        sequenceStream.close()
                         fos.close()
                     }
                 }
