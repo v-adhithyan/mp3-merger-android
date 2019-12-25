@@ -1,4 +1,4 @@
-package ceg.avtechlabs.mp3merger
+package ceg.avtechlabs.avmergemp3
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getTargetContext()
-        assertEquals("ceg.avtechlabs.mp3merger", appContext.packageName)
+        assertEquals("ceg.avtechlabs.avmergemp3", appContext.packageName)
     }
 }

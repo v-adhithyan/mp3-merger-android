@@ -1,4 +1,4 @@
-package ceg.avtechlabs.mp3merger
+package ceg.avtechlabs.avmergemp3
 
 import org.junit.Test
 

@@ -1,11 +1,10 @@
-package ceg.avtechlabs.mp3merger
+package ceg.avtechlabs.avmergemp3
 
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
@@ -32,24 +31,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
-
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     fun selectMp3(v: View) {
@@ -67,22 +48,28 @@ class MainActivity : AppCompatActivity() {
                     doAsync {
                         val mp3Count = data?.clipData?.itemCount
                         val mp3FilesUri = ArrayList<Uri>()
-                        for(i in 0..mp3Count!!-1) {
+                        for(i in 0 until mp3Count!!) {
+                            val uri = data.clipData?.getItemAt(i)!!.uri ?: continue
+                            if(uri.scheme.equals("content")) {
+                                val cursor = contentResolver.query(
+                                    uri,
+                                    arrayOf(android.provider.MediaStore.Images.ImageColumns.DATA),
+                                    null,
+                                    null,
+                                    null
+                                )
+                                cursor.moveToFirst()
+                                Log.d("ADHI", cursor.getString(0))
+                                cursor.close()
+                            } else {
+                                Log.d("ADHI", uri.path)
+                            }
+                            Log.d("ADHI", data.clipData?.getItemAt(i)!!.uri.toString())
                             mp3FilesUri.add(data.clipData?.getItemAt(i)!!.uri)
                         }
-                        
+
                         val fname = Environment.getExternalStorageDirectory().absolutePath + "/AVMp3Merger/mymerge.mp3"
-                        val file = File(fname)
-                        if(!file.exists()) {
-                            if(!file.parentFile.exists()) {
-                                file.parentFile.mkdirs()
-                            }
-                            file.createNewFile()
-                        } else {
-                            file.delete()
-                            file.createNewFile()
-                        }
-                        // ffmpeg -f concat -i <( for f in *.wav; do echo "file '$(pwd)/$f'"; done ) output.wav
+
                     }
                 }
             }
