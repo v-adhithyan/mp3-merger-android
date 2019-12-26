@@ -11,18 +11,22 @@ import android.view.MenuItem
 import android.view.View
 
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.InputStream
-import java.io.SequenceInputStream
 import java.util.*
 import kotlin.collections.ArrayList
 import android.os.Environment.getExternalStorageDirectory
+import android.provider.OpenableColumns
 import android.util.Log
+import android.widget.TextView
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.progressDialog
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.uiThread
-import java.io.File
-import java.io.FileOutputStream
+import android.provider.MediaStore
+import android.provider.DocumentsContract
+import android.annotation.TargetApi
+import android.content.Context
+import android.widget.Toast
+import java.io.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -40,6 +44,35 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(Intent.createChooser(intent, "Choose mp3's"), SELECT_MP3)
     }
 
+    @TargetApi(19)
+    private fun generatePath(uri: Uri, context: Context): String? {
+        var filePath: String? = null
+        if (DocumentsContract.isDocumentUri(context, uri)) {
+            val wholeID = DocumentsContract.getDocumentId(uri)
+
+
+            //val id = wholeID.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
+            val id = wholeID
+
+            val column = arrayOf(MediaStore.Audio.Media.DATA)
+            val sel = MediaStore.Video.Media._ID + "=?"
+
+            val cursor = context.getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                column, sel, arrayOf(id), null
+            )
+
+
+            val columnIndex = cursor.getColumnIndex(column[0])
+
+            if (cursor.moveToFirst()) {
+                filePath = cursor.getString(columnIndex)
+            }
+
+            cursor.close()
+        }
+        return filePath
+    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         when(requestCode) {
@@ -47,29 +80,24 @@ class MainActivity : AppCompatActivity() {
                 if(resultCode == Activity.RESULT_OK) {
                     doAsync {
                         val mp3Count = data?.clipData?.itemCount
-                        val mp3FilesUri = ArrayList<Uri>()
+                        val mergedFile = Environment.getExternalStorageDirectory().absolutePath + "/AVMp3Merger/mymerge1.mp3"
+                        val outputStream = FileOutputStream(File(mergedFile), false)
+                        val buffer = ByteArray(1048576)
                         for(i in 0 until mp3Count!!) {
-                            val uri = data.clipData?.getItemAt(i)!!.uri ?: continue
-                            if(uri.scheme.equals("content")) {
-                                val cursor = contentResolver.query(
-                                    uri,
-                                    arrayOf(android.provider.MediaStore.Images.ImageColumns.DATA),
-                                    null,
-                                    null,
-                                    null
-                                )
-                                cursor.moveToFirst()
-                                Log.d("ADHI", cursor.getString(0))
-                                cursor.close()
-                            } else {
-                                Log.d("ADHI", uri.path)
+                            val uri = data.clipData?.getItemAt(i)?.uri!!
+
+                            val inputStream = contentResolver.openInputStream(uri)
+                            while(true){
+                                val count = inputStream?.read(buffer)!!
+                                if(count == -1)
+                                    break
+                                outputStream.write(buffer, 0, count)
+                                outputStream.flush()
                             }
-                            Log.d("ADHI", data.clipData?.getItemAt(i)!!.uri.toString())
-                            mp3FilesUri.add(data.clipData?.getItemAt(i)!!.uri)
+                            inputStream.close()
                         }
-
-                        val fname = Environment.getExternalStorageDirectory().absolutePath + "/AVMp3Merger/mymerge.mp3"
-
+                        outputStream.close()
+                        toast("Done.")
                     }
                 }
             }
