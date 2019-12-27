@@ -1,32 +1,20 @@
 package ceg.avtechlabs.avmergemp3
 
+import android.annotation.TargetApi
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.support.v7.app.AppCompatActivity;
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-
-import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
-import kotlin.collections.ArrayList
-import android.os.Environment.getExternalStorageDirectory
-import android.provider.OpenableColumns
-import android.util.Log
-import android.widget.TextView
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.progressDialog
-import org.jetbrains.anko.toast
-import org.jetbrains.anko.uiThread
-import android.provider.MediaStore
 import android.provider.DocumentsContract
-import android.annotation.TargetApi
-import android.content.Context
-import android.widget.Toast
-import java.io.*
+import android.provider.MediaStore
+import android.support.v7.app.AppCompatActivity
+import android.view.View
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.toast
+import java.io.File
+import java.io.FileOutputStream
 
 
 class MainActivity : AppCompatActivity() {
@@ -35,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        startActivity(Intent(this@MainActivity, ChooseFileActivity::class.java))
     }
 
     fun selectMp3(v: View) {
@@ -81,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                     doAsync {
                         val mp3Count = data?.clipData?.itemCount
                         val mergedFile = Environment.getExternalStorageDirectory().absolutePath + "/AVMp3Merger/mymerge1.mp3"
-                        val outputStream = FileOutputStream(File(mergedFile), false)
+                        val outputStream = FileOutputStream(File(mergedFile), true)
                         val buffer = ByteArray(1048576)
                         for(i in 0 until mp3Count!!) {
                             val uri = data.clipData?.getItemAt(i)?.uri!!
