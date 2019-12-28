@@ -101,7 +101,7 @@ class ChooseFileActivity : AppCompatActivity() {
                 fn = "mymerge1-$uuid.mp3"
             } else {
                 fn = fn.replace(".mp3", "")
-                fn += ".mp3"
+                fn = "$fn.mp3"
             }
             val mergedFile = Environment.getExternalStorageDirectory().absolutePath + "/AVMp3Merger/$fn"
             val f = File(mergedFile)
@@ -143,13 +143,12 @@ class ChooseFileActivity : AppCompatActivity() {
         val dialogBuilder = AlertDialog.Builder(this)
         val inflater = this.layoutInflater
         val dialogView = inflater.inflate(R.layout.merge_file_name_input, null)
+        val mergeFileText = dialogView.find<EditText>(R.id.merge_file_name)
         dialogBuilder.setView(dialogView)
-
-        val edt = merge_file_name
-
         dialogBuilder.setMessage("Enter file name for new file")
         dialogBuilder.setPositiveButton("Done", DialogInterface.OnClickListener { dialog, whichButton ->
-            merge(edt.text.toString().trim())
+            val fileName = mergeFileText.text.toString().trim()
+            merge(fileName)
         })
         dialogBuilder.setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, whichButton ->
             //pass
