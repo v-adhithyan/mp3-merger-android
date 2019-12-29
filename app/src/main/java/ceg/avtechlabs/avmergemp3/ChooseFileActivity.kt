@@ -1,32 +1,30 @@
 package ceg.avtechlabs.avmergemp3
 
-import android.app.ProgressDialog
+import android.app.AlertDialog
+import android.content.Context
 import android.content.DialogInterface
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.EditText
-import android.widget.ListView
-import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_choose_file.*
 import org.jetbrains.anko.*
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import android.app.AlertDialog
-import android.view.LayoutInflater
-import kotlinx.android.synthetic.main.merge_file_name_input.*
 
 
 class ChooseFileActivity : AppCompatActivity() {
-    var filesToMerge = ArrayList<File>()
-    val mp3Names = ArrayList<String?>()
-    val mp3Paths = ArrayList<String?>()
+    private var filesToMerge = ArrayList<File>()
+    private val mp3Names = ArrayList<String?>()
+    private val mp3Paths = ArrayList<String?>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_file)
@@ -49,7 +47,6 @@ class ChooseFileActivity : AppCompatActivity() {
             runOnUiThread {
                 val adapter = ArrayAdapter<String>(this@ChooseFileActivity, android.R.layout.simple_list_item_1, mp3Names)
                 files_list_view.adapter = adapter
-                //files_list_view.choiceMode = ListView.CHOICE_MODE_MULTIPLE
                 files_list_view.setOnItemClickListener { adapterView, view, i, l ->
                     toast(mp3Paths[i]!!)
                     filesToMerge.add(File(mp3Paths[i]!!))
@@ -59,7 +56,7 @@ class ChooseFileActivity : AppCompatActivity() {
 
     }
 
-    fun getPlayList(rootPath: String): ArrayList<HashMap<String, String>>? {
+    private fun getPlayList(rootPath: String): ArrayList<HashMap<String, String>>? {
 
         val fileList = ArrayList<HashMap<String, String>>()
 
@@ -87,7 +84,7 @@ class ChooseFileActivity : AppCompatActivity() {
         }
     }
 
-    fun merge(fileName: String) {
+    private fun merge(fileName: String) {
         val progressDialog = progressDialog("MP3 Merge", "Please wait")
         progressDialog.isIndeterminate = false
         progressDialog.max = 100
@@ -146,15 +143,17 @@ class ChooseFileActivity : AppCompatActivity() {
         val mergeFileText = dialogView.find<EditText>(R.id.merge_file_name)
         dialogBuilder.setView(dialogView)
         dialogBuilder.setMessage("Enter file name for new file")
-        dialogBuilder.setPositiveButton("Done", DialogInterface.OnClickListener { dialog, whichButton ->
+        dialogBuilder.setPositiveButton("Done") { _, _ ->
             val fileName = mergeFileText.text.toString().trim()
             merge(fileName)
-        })
-        dialogBuilder.setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, whichButton ->
-            //pass
-        })
+        }
+        dialogBuilder.setNegativeButton("Cancel") { _, _ ->
+        }
         val b = dialogBuilder.create()
         b.show()
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase))
+    }
 }
