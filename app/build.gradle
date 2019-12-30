@@ -32,5 +32,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     implementation "org.jetbrains.anko:anko-commons:0.10.4"
-    implementation 'com.googlecode.mp4parser:isoparser:1.1.9'
+    implementation 'uk.co.chrisjenx:calligraphy:2.3.0'
 }

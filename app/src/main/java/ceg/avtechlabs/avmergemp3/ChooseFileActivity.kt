@@ -22,6 +22,7 @@ import kotlin.collections.HashMap
 
 class ChooseFileActivity : AppCompatActivity() {
     private var filesToMerge = ArrayList<File>()
+    private var fileNamesChosen = ArrayList<String>()
     private val mp3Names = ArrayList<String?>()
     private val mp3Paths = ArrayList<String?>()
 
@@ -48,8 +49,9 @@ class ChooseFileActivity : AppCompatActivity() {
                 val adapter = ArrayAdapter<String>(this@ChooseFileActivity, android.R.layout.simple_list_item_1, mp3Names)
                 files_list_view.adapter = adapter
                 files_list_view.setOnItemClickListener { adapterView, view, i, l ->
-                    toast(mp3Paths[i]!!)
                     filesToMerge.add(File(mp3Paths[i]!!))
+                    fileNamesChosen.add(mp3Names[i]!!)
+                    text_chosen_files.text = "Chosen files \n:${fileNamesChosen.joinToString("\n")}"
                 }
             }
         }
@@ -131,6 +133,8 @@ class ChooseFileActivity : AppCompatActivity() {
             outputStream.close()
 
             filesToMerge = ArrayList<File>()
+            fileNamesChosen = ArrayList<String>()
+            text_chosen_files.text = "Merging files completed."
             progressDialog.dismiss()
             runOnUiThread { toast("Done $mergedFile") }
         }

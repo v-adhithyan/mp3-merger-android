@@ -6,8 +6,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ChooseFileActivity">
+
+    <TextView
+            android:id="@+id/text_chosen_files"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Choose files to merge. Tap on a file to select."
+            android:onClick="showFileDialog"
+    />
+
     <Button
             android:id="@+id/merge_files"
+            android:layout_below="@+id/text_chosen_files"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Merge files"
