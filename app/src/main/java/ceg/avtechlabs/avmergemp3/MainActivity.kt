@@ -13,23 +13,32 @@ import org.jetbrains.anko.browse
 import org.jetbrains.anko.intentFor
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 import java.io.File
+import android.widget.AdapterView
+
+
 
 
 class MainActivity : AppCompatActivity() {
+    val logos = arrayOf(R.drawable.merge_audio, R.drawable.cut_audio)
+    val names = arrayOf("Merge Audio", "Cut Audio")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        main_menu_grid.adapter = CustomAdapter(this@MainActivity, logos, names)
+        main_menu_grid.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
+            val currentItem = names[id.toInt()]
+            if(currentItem == "Merge Audio") {
+                startActivity(intentFor<ChooseFileActivity>())
+            } else if (currentItem == "Cut Audio") {
+                startActivity(intentFor<MainActivity>())
+            }
+        }
         setRecentFiles()
     }
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase))
-    }
-
-    fun openChooseFilesActivity(v: View){
-        startActivity(intentFor<ChooseFileActivity>())
     }
 
     private fun setRecentFiles() {

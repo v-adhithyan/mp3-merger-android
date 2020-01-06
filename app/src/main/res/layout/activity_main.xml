@@ -7,32 +7,16 @@
         android:orientation="vertical"
         tools:context=".MainActivity">
 
-    <LinearLayout
+    <GridView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_gravity="center"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
-    >
-        <ImageButton
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/merge_audio"
-                android:background="@android:color/white"
-                android:onClick="openChooseFilesActivity"
-        />
-        <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="11pt"
-                android:text="Merge Audio"
-        />
-    </LinearLayout>
+            android:id="@+id/main_menu_grid"
+            android:numColumns="2"/>
 
     <TextView
             android:layout_width="wrap_content"
